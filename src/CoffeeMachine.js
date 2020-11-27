@@ -1,24 +1,15 @@
 import { useEffect, useState } from "react";
 import { useMachine } from "@xstate/react";
-import stateMachine from "./coffeeMachineFsm";
+import stateMachine, { EVENTS, STATES } from "./coffeeMachineFsm";
 import './CoffeeMachine.css';
 
 const CoffeeMachine = () => {
   const [current, send] = useMachine(stateMachine);
 
-  const [isReady, setIsReady] = useState(false);
-  const [hasCoffee, setHasCoffee] = useState(false);
-  const [hasWater, setHasWater] = useState(false);
+  const { hasCoffee, hasWater } = current.context;
+
   const [isBrewing, setIsBrewing] = useState(false);
   const [isBrewed, setIsBrewed] = useState(false);
-
-  useEffect(() => {
-    if(hasCoffee && hasWater) {
-      setIsReady(true);
-    } else {
-      setIsReady(false);
-    }
-  }, [hasCoffee, hasWater]);
 
   useEffect(() => {
     if (isBrewing) {
@@ -31,8 +22,8 @@ const CoffeeMachine = () => {
 
   useEffect(() => {
     if (isBrewed) {
-      setHasCoffee(false);
-      setHasWater(false);
+      //setHasCoffee(false);
+      //setHasWater(false);
     }
   }, [isBrewed])
 
@@ -53,9 +44,9 @@ const CoffeeMachine = () => {
       <div className="controls">
         <h2>The Controls</h2>
         <ul>
-          <li><button type="button" disabled={hasWater} onClick={() => setHasWater(true)}>Add Water</button></li>
-          <li><button type="button" disabled={hasCoffee} onClick={() => setHasCoffee(true)}>Add Coffee</button></li>
-          <li><button type="button" disabled={!isReady || isBrewing || isBrewed} onClick={() => setIsBrewing(true)}>Brew</button></li>
+          <li><button type="button" disabled={hasWater} onClick={() => send(EVENTS.ADD_WATER)}>Add Water</button></li>
+          <li><button type="button" disabled={hasCoffee} onClick={() => send(EVENTS.ADD_COFFEE)}>Add Coffee</button></li>
+          <li><button type="button" disabled={!current.matches(STATES.READY) || isBrewing || isBrewed} onClick={() => setIsBrewing(true)}>Brew</button></li>
           <li><button type="button" disabled={!isBrewed} onClick={() => setIsBrewed(false)}>Pour</button></li>
         </ul>
       </div>
