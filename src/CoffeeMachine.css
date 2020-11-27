@@ -54,6 +54,7 @@
 }
 
 .controls button {
+    cursor: pointer;
     padding: 10px 6px;
     width: 100px;
 }
