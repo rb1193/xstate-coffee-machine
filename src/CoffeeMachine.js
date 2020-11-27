@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
+import { useMachine } from "@xstate/react";
+import stateMachine from "./coffeeMachineFsm";
 import './CoffeeMachine.css';
 
 const CoffeeMachine = () => {
+  const [current, send] = useMachine(stateMachine);
+
   const [isReady, setIsReady] = useState(false);
   const [hasCoffee, setHasCoffee] = useState(false);
   const [hasWater, setHasWater] = useState(false);
