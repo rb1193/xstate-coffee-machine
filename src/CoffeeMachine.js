@@ -6,7 +6,7 @@ const CoffeeMachine = () => {
   const [current, send] = useMachine(stateMachine);
   const { coffee, cupFilled } = current.context;
   const cupIsPresent = current.matches(`cup.${CUP_STATES.PRESENT}`)
-console.log(cupFilled)
+
   return (
     <div className="machine">
       <div className="coffee">
