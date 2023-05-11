@@ -3,17 +3,20 @@ import { assign } from "xstate";
 
 const ACTIONS = {
   ADD_COFFEE: "addCoffee",
-  BREW: "brew",
+  FILL: "brew",
+  GRIND: "grind",
+  DRINK: "drink",
 }
 
 const GUARDS = {
-  IS_NOT_FULL: "isNotFull",
+  IS_CUP_FULL: "isCupFull",
+  HAS_ROOM_FOR_MORE_COFFEE: "hasRoomForMoreCoffee",
   IS_READY: "isReady",
 }
 
 export const EVENTS = {
   ADD_COFFEE: "add_coffee",
-  BREW: "brew",
+  MAKE_COFFEE: "make_coffee",
   PLACE_CUP: "place_cup",
   SWITCH_OFF: "switch_off",
   SWITCH_ON: "switch_on",
@@ -38,6 +41,7 @@ const coffeeMachine = createMachine({
   type: "parallel",
   context: {
     coffee: 0,
+    cupFilled: 0,
   },
   states: {
     coffee: {
@@ -54,11 +58,12 @@ const coffeeMachine = createMachine({
           on: {
             [EVENTS.ADD_COFFEE]: {
               actions: [ACTIONS.ADD_COFFEE],
-              cond: GUARDS.IS_NOT_FULL,
+              cond: GUARDS.HAS_ROOM_FOR_MORE_COFFEE,
             },
-            [EVENTS.BREW]: {
+            [EVENTS.MAKE_COFFEE]: {
               target: COFFEE_STATES.BREWING,
               cond: GUARDS.IS_READY,
+              actions: [ACTIONS.GRIND],
             },
             [EVENTS.SWITCH_OFF]: {
               target: COFFEE_STATES.OFF,
@@ -66,10 +71,14 @@ const coffeeMachine = createMachine({
           }
         },
         [COFFEE_STATES.BREWING]: {
+          always: {
+            target: COFFEE_STATES.READY,
+            cond: GUARDS.IS_CUP_FULL,
+          },
           after: {
-            2500: {
-              target: COFFEE_STATES.READY,
-              actions: [ACTIONS.BREW]
+            200: {
+              target: COFFEE_STATES.BREWING,
+              actions: [ACTIONS.FILL],
             }
           },
         },
@@ -90,7 +99,8 @@ const coffeeMachine = createMachine({
             [EVENTS.TAKE_CUP]: {
               target: CUP_STATES.MISSING,
             }
-          }
+          },
+          exit: [ACTIONS.DRINK]
         },
       }
     }
@@ -100,14 +110,21 @@ const coffeeMachine = createMachine({
     [ACTIONS.ADD_COFFEE]: assign({
       coffee: ({ coffee }) => coffee + 5,
     }),
-    [ACTIONS.BREW]: assign({
-      coffee: ({ coffee }) => coffee - 1,
+    [ACTIONS.FILL]: assign({
+      cupFilled: ({ cupFilled }) => cupFilled + 1,
     }),
+    [ACTIONS.DRINK]: assign({
+      cupFilled: 0,
+    }),
+    [ACTIONS.GRIND]: assign({
+      coffee: ({ coffee }) => coffee - 1,
+    })
   },
   guards: {
-    [GUARDS.IS_NOT_FULL]: ({ coffee }) => coffee < 10,
-    [GUARDS.IS_READY]: ({ coffee }, _, { state }) => {
-      return state.matches(`cup.${CUP_STATES.PRESENT}`) && coffee > 0
+    [GUARDS.HAS_ROOM_FOR_MORE_COFFEE]: ({ coffee }) => coffee <= 5,
+    [GUARDS.IS_CUP_FULL]: ({ cupFilled }) => cupFilled >= 10,
+    [GUARDS.IS_READY]: ({ coffee, cupFilled }, _, { state }) => {
+      return state.matches(`cup.${CUP_STATES.PRESENT}`) && cupFilled === 0 && coffee > 0
     }
   }
 });

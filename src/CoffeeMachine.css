@@ -91,13 +91,16 @@
 
 .cup {
     width: 80%;
-    height: 80%;
+    height: 100%;
+    border: 20px solid silver;
     border-top: none;
     background-color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
 }
 
 .cup-fill {
     width: 100%;
-    height: 100%;
     background-color: saddlebrown;
 }
