@@ -29,9 +29,9 @@ const CoffeeMachine = () => {
       </div>
       <div></div>
       <div></div>
-      <div class="cup-holder">
-        <div class="cup">
-          <div class="cup-fill"></div>
+      <div className="cup-holder">
+        <div className="cup">
+          <div className="cup-fill"></div>
         </div>
       </div>
       <div></div>
