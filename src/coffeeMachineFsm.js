@@ -14,54 +14,86 @@ const GUARDS = {
 export const EVENTS = {
   ADD_COFFEE: "add_coffee",
   BREW: "brew",
+  PLACE_CUP: "place_cup",
   SWITCH_OFF: "switch_off",
   SWITCH_ON: "switch_on",
+  TAKE_CUP: "take_cup",
 }
 
-export const STATES = {
+export const COFFEE_STATES = {
   OFF: "off",
   READY: "ready",
   BREWING: "brewing",
 }
 
+export const CUP_STATES = {
+  MISSING: "missing",
+  PRESENT: "present",
+}
+
 const coffeeMachine = createMachine({
   id: "tw-ncl-coffee-machine",
   strict: true,
-  initial: STATES.OFF,
+  predictableActionArguments: true,
+  type: "parallel",
   context: {
     coffee: 0,
   },
   states: {
-    [STATES.OFF]: {
-      on: {
-        [EVENTS.SWITCH_ON]: {
-          target: STATES.READY,
-        }
-      }
-    },
-    [STATES.READY]: {
-      on: {
-        [EVENTS.ADD_COFFEE]: {
-          actions: [ACTIONS.ADD_COFFEE],
-          cond: GUARDS.IS_NOT_FULL,
+    coffee: {
+      initial: COFFEE_STATES.OFF,
+      states: {
+        [COFFEE_STATES.OFF]: {
+          on: {
+            [EVENTS.SWITCH_ON]: {
+              target: COFFEE_STATES.READY,
+            }
+          }
         },
-        [EVENTS.BREW]: {
-          target: STATES.BREWING,
-          cond: GUARDS.IS_READY,
+        [COFFEE_STATES.READY]: {
+          on: {
+            [EVENTS.ADD_COFFEE]: {
+              actions: [ACTIONS.ADD_COFFEE],
+              cond: GUARDS.IS_NOT_FULL,
+            },
+            [EVENTS.BREW]: {
+              target: COFFEE_STATES.BREWING,
+              cond: GUARDS.IS_READY,
+            },
+            [EVENTS.SWITCH_OFF]: {
+              target: COFFEE_STATES.OFF,
+            }
+          }
         },
-        [EVENTS.SWITCH_OFF]: {
-          target: STATES.OFF,
-        }
-      }
-    },
-    [STATES.BREWING]: {
-      after:{
-        2500: {
-          target: STATES.READY,
-          actions: [ACTIONS.BREW]
-        }
+        [COFFEE_STATES.BREWING]: {
+          after: {
+            2500: {
+              target: COFFEE_STATES.READY,
+              actions: [ACTIONS.BREW]
+            }
+          },
+        },
       },
     },
+    cup: {
+      initial: CUP_STATES.MISSING,
+      states: {
+        [CUP_STATES.MISSING]: {
+          on: {
+            [EVENTS.PLACE_CUP]: {
+              target: CUP_STATES.PRESENT,
+            },
+          }
+        },
+        [CUP_STATES.PRESENT]: {
+          on: {
+            [EVENTS.TAKE_CUP]: {
+              target: CUP_STATES.MISSING,
+            }
+          }
+        },
+      }
+    }
   }
 }, {
   actions: {
@@ -73,8 +105,10 @@ const coffeeMachine = createMachine({
     }),
   },
   guards: {
-    [GUARDS.IS_NOT_FULL]: ({coffee}) => coffee < 10,
-    [GUARDS.IS_READY]: ({ coffee }) => coffee > 0,
+    [GUARDS.IS_NOT_FULL]: ({ coffee }) => coffee < 10,
+    [GUARDS.IS_READY]: ({ coffee }, _, { state }) => {
+      return state.matches(`cup.${CUP_STATES.PRESENT}`) && coffee > 0
+    }
   }
 });
 

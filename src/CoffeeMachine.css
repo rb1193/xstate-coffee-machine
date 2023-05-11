@@ -10,13 +10,14 @@
 }
 
 .machine > div {
-    background-color: white;
     width: 100%;
     position: relative;
 }
 
-.machine h2 {
-    margin-bottom: 50px;
+.machine-label {
+    color: white;
+    margin: 20px;
+    text-align: center;
 }
 
 .container {
@@ -27,6 +28,10 @@
     border: 1px solid black;
     border-top: 0;
     position: relative;
+}
+
+.coffee {
+    background-color: white;
 }
 
 .tap .pipe {
@@ -57,9 +62,13 @@
     background-color: saddlebrown;
 }
 
+.controls {
+    background-color: white;
+}
+
 .controls ul {
     list-style: none;
-    margin: 0;
+    margin: 10px;
     padding: 0;
 }
 
@@ -77,13 +86,14 @@
     display: flex;
     justify-content: center;
     align-items: flex-end;
+    cursor: pointer;
 }
 
 .cup {
     width: 80%;
     height: 80%;
-    border: 2px solid black;
     border-top: none;
+    background-color: white;
 }
 
 .cup-fill {
