@@ -1,96 +1,80 @@
-import { Machine } from "xstate";
+import { createMachine } from "xstate";
 import { assign } from "xstate";
 
 const ACTIONS = {
   ADD_COFFEE: "addCoffee",
-  ADD_WATER: "addWater",
   BREW: "brew",
 }
 
 const GUARDS = {
+  IS_NOT_FULL: "isNotFull",
   IS_READY: "isReady",
 }
 
 export const EVENTS = {
   ADD_COFFEE: "add_coffee",
-  ADD_WATER: "add_water",
   BREW: "brew",
-  POUR: "pour",
+  SWITCH_OFF: "switch_off",
+  SWITCH_ON: "switch_on",
 }
 
 export const STATES = {
-  EMPTY: "empty",
+  OFF: "off",
   READY: "ready",
   BREWING: "brewing",
-  BREWED: "brewed",
 }
 
-const coffeeMachine = Machine({
-  id: "moccamaster",
+const coffeeMachine = createMachine({
+  id: "tw-ncl-coffee-machine",
   strict: true,
-  initial: STATES.EMPTY,
+  initial: STATES.OFF,
   context: {
-    hasCoffee: false,
-    hasWater: false,
+    coffee: 0,
   },
   states: {
-    [STATES.EMPTY]: {
-      always: [
-        { target: STATES.READY, cond: GUARDS.IS_READY }
-      ],
+    [STATES.OFF]: {
       on: {
-        [EVENTS.ADD_COFFEE]: {
-          actions: [ACTIONS.ADD_COFFEE],
-        },
-        [EVENTS.ADD_WATER]: {
-          actions: [ACTIONS.ADD_WATER],
-        },
+        [EVENTS.SWITCH_ON]: {
+          target: STATES.READY,
+        }
       }
     },
     [STATES.READY]: {
       on: {
+        [EVENTS.ADD_COFFEE]: {
+          actions: [ACTIONS.ADD_COFFEE],
+          cond: GUARDS.IS_NOT_FULL,
+        },
         [EVENTS.BREW]: {
           target: STATES.BREWING,
+          cond: GUARDS.IS_READY,
+        },
+        [EVENTS.SWITCH_OFF]: {
+          target: STATES.OFF,
         }
       }
     },
     [STATES.BREWING]: {
       after:{
         2500: {
-          target: STATES.BREWED,
+          target: STATES.READY,
           actions: [ACTIONS.BREW]
         }
-      }
+      },
     },
-    [STATES.BREWED]: {
-      on: {
-        [EVENTS.POUR]: {
-          target: STATES.EMPTY,
-        },
-        [EVENTS.ADD_COFFEE]: {
-          actions: [ACTIONS.ADD_COFFEE],
-        },
-        [EVENTS.ADD_WATER]: {
-          actions: [ACTIONS.ADD_WATER],
-        },
-      }
-    }
   }
 }, {
   actions: {
     [ACTIONS.ADD_COFFEE]: assign({
-      hasCoffee: true,
-    }),
-    [ACTIONS.ADD_WATER]: assign({
-      hasWater: true,
+      coffee: ({ coffee }) => coffee + 5,
     }),
     [ACTIONS.BREW]: assign({
-      hasCoffee: false,
-      hasWater: false
+      coffee: ({ coffee }) => coffee - 1,
     }),
   },
   guards: {
-    [GUARDS.IS_READY]: ({ hasCoffee, hasWater }) => hasCoffee && hasWater, 
+    [GUARDS.IS_NOT_FULL]: ({coffee}) => coffee < 10,
+    [GUARDS.IS_READY]: ({ coffee }) => coffee > 0,
   }
 });
 

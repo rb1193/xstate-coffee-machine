@@ -1,16 +1,18 @@
 .machine {
     display: grid;
-    justify-content: center;
-    justify-items: center;
-    grid-template-columns: 50% 50%;
-    grid-template-rows: 50% 50%;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
     max-width: 1200px;
     margin: 50px auto;
+    border: 1px solid black;
+    grid-gap: 1px;
+    background-color: black;
 }
 
 .machine > div {
-    border: 1px solid black;
+    background-color: white;
     width: 100%;
+    position: relative;
 }
 
 .machine h2 {
@@ -27,19 +29,31 @@
     position: relative;
 }
 
+.tap .pipe {
+    margin: 0 auto;
+    width: 30px;
+    background-color: silver;
+    border: 2px solid black;
+    height: 50%;
+}
+
+.tap .stream {
+    height: 50%;
+    margin: 0 auto;
+    width: 30px;
+}
+
+.tap .stream-in-progress {
+    background-color: saddlebrown;
+}
+
 .fill {
-    position: relative;
-    top: 50px;
-    height: 199px;
+    position: absolute;
     width: 100%;
-    border-top: 1px solid black;
+    bottom: 0;
 }
 
-.fill-water {
-    background-color: paleturquoise; 
-}
-
-.fill-filter, .fill-pot {
+.fill-coffee {
     background-color: saddlebrown;
 }
 
@@ -57,4 +71,17 @@
     cursor: pointer;
     padding: 10px 6px;
     width: 100px;
+}
+
+.cup-holder {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+}
+
+.cup {
+    width: 80%;
+    height: 80%;
+    border: 2px solid black;
+    border-top: none;
 }
